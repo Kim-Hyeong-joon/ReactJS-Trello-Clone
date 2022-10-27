@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 const Title = styled.h2`
@@ -29,7 +30,7 @@ interface IAreaProps {
 const Area = styled.div<IAreaProps>`
   background-color: ${(props) =>
     props.isDraggingOver
-      ? "#defe6e9"
+      ? "#def6e9"
       : props.isDraggingFromThis
       ? "#b2bec3"
       : "transparent"};
@@ -41,9 +42,34 @@ const Area = styled.div<IAreaProps>`
 
 const Form = styled.form`
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   input {
+    all: unset;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     width: 100%;
+    background-color: white;
+    border-radius: 5px;
+    width: 80%;
+    padding: 3px;
+    padding-left: 5px;
+    box-shadow: 0 0 5px 0.1px rgba(0, 0, 0, 0.5);
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 10px;
   }
+`;
+
+const DeleteBtn = styled.button`
+  position: absolute;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 interface IBoardProps {
@@ -61,16 +87,27 @@ function Board({ toDos, boardId }: IBoardProps) {
   const onValid = ({ toDo }: IForm) => {
     const newToDo = { id: Date.now(), text: toDo };
     setToDos((allBoards) => {
-      return {
+      const newAllBoards = {
         ...allBoards,
         [boardId]: [...allBoards[boardId], newToDo],
       };
+      localStorage.setItem("allBoards", JSON.stringify(newAllBoards));
+      return newAllBoards;
     });
     setValue("toDo", "");
+  };
+  const handleClick = () => {
+    setToDos((allBoards) => {
+      const boardsCopy = { ...allBoards };
+      delete boardsCopy[boardId];
+      localStorage.setItem("allBoards", JSON.stringify(boardsCopy));
+      return boardsCopy;
+    });
   };
   return (
     <Wrapper>
       <Title>{boardId}</Title>
+      <DeleteBtn onClick={handleClick}>X</DeleteBtn>
       <Form onSubmit={handleSubmit(onValid)}>
         <input
           {...register("toDo", { required: true })}
